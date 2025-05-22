@@ -1,8 +1,9 @@
 import discord
-from discord.ext import commands
 import logging
-from dotenv import load_dotenv
 import os
+from ics_writer import ics_writer
+from dotenv import load_dotenv
+from discord.ext import commands
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -119,6 +120,9 @@ async def schedule(ctx):
                           f"**Date/Time**: {event['date']}\n"
                           f"**Notes**: {event['description']}\n"
                           f"**Participants**: {', '.join(event['emails'])}\n")
+    
+    ics_file_path = ics_writer(event)
+
     
     
 
