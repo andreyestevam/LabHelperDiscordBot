@@ -73,7 +73,7 @@ async def schedule(ctx):
         else:
             await ctx.author.send("Invalid date format. Please use YYYY-MM-DD.")
 
-    await ctx.author.send("Start time (format HH:MM):")
+    await ctx.author.send("Start time (Eastern Time ET). Please use HH:MM (24-hour time format, e.g. 2pm would be 14:00):")
     valid_start_time = False
     while not valid_start_time:
         start_time_msg = await bot.wait_for('message', check=check)
@@ -84,11 +84,11 @@ async def schedule(ctx):
                 event['start_time'] = start_time_str
                 valid_start_time = True
             else:
-                await ctx.author.send("Invalid start time. Please use HH:MM.")
+                await ctx.author.send("Invalid start time (Eastern Time ET). Please use HH:MM (24-hour time format, e.g. 2pm would be 14:00).")
         else:
-            await ctx.author.send("Invalid start time. Please use HH:MM.")
+            await ctx.author.send("Invalid start time (Eastern Time ET). Please use HH:MM (24-hour time format, e.g. 2pm would be 14:00).")
     
-    await ctx.author.send("End time (format HH:MM):")
+    await ctx.author.send("End time (Eastern Time ET). Please use HH:MM (24-hour time format):")
     valid_end_time = False
     while not valid_end_time:
         end_time_msg = await bot.wait_for('message', check=check)
@@ -99,11 +99,11 @@ async def schedule(ctx):
                 event['end_time'] = end_time_str
                 valid_end_time = True
             else:
-                await ctx.author.send("Invalid end time. Please use HH:MM.")
+                await ctx.author.send("Invalid end time (Eastern Time ET). Please use HH:MM (24-hour time format).")
         else:
-            await ctx.author.send("Invalid end time. Please use HH:MM.")
+            await ctx.author.send("Invalid end time (Eastern Time ET). Please use HH:MM (24-hour time format).")
     
-    event['uid'] = event['date'] + "LabHelperEvent" # uid stands for unique ID, required for the creation of an ICS file so that we can write the calendar event file. 
+    event['uid'] = event['date'].replace("-", "") + "LabHelperEvent" # uid stands for unique ID, required for the creation of an ICS file so that we can write the calendar event file.
     
     await ctx.author.send("Any additional notes or links for the event? If none, please text \"none\".")
     description_msg = await bot.wait_for('message', check=check)
@@ -113,7 +113,7 @@ async def schedule(ctx):
     emails_msg = await bot.wait_for('message', check=check)
     event['emails'] = []
     for email in emails_msg.content.split(","):
-        event['emails'].append(email)
+        event['emails'].replace(" ", "").append(email) # Make sure there is no space so that the invite can be correctly sent.
     
     await ctx.author.send(f"Here are the event details:\n"
                           f"**Title**: {event['title']}\n"

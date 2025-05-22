@@ -1,2 +1,4 @@
 .env
 discord.log
+__pycache__/
+*.pyc

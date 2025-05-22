@@ -15,14 +15,14 @@ def to_ics(event: dict) -> Tuple[str, str]:
                 "PRODID:-//LabHelperBot//CalendarExport 1.0//EN\r\n"
                 "BEGIN:VEVENT\r\n")
     ics_string += "UID:" + event['uid'] + "\r\n"
-    ics_string += "DTSTAMP:" + event['date'] + "T" + event['start_time'] + "Z\r\n"
-    ics_string += "DTSTART:" + event['date'] + "T" + event['start_time'] + "\r\n"
-    ics_string += "DTEND:" + event['date'] + "T" + event['end_time'] + "\r\n"
+    ics_string += "DTSTAMP:" + event['date'].replace("-", "") + "T" + event['start_time'].replace(":","") + "00Z\r\n"
+    ics_string += "DTSTART:" + event['date'].replace("-", "") + "T" + event['start_time'].replace(":","") + "00\r\n"
+    ics_string += "DTEND:" + event['date'].replace("-", "") + "T" + event['end_time'].replace(":","") + "\r\n"
     ics_string += "SUMMARY:" + event['title'] + "\r\n"
     ics_string += "DESCRIPTION:" + event['description'] + "\r\n"
     ics_string += "LOCATION:" + event['location'] + "\r\n"
     for email in event['emails']:
-        ics_string += "ATTENDEE;CN=" + email + ":mailto:" + email + "\r\n"
+        ics_string += "ATTENDEE" + ":mailto:" + email + "\r\n"
     ics_string += "END:VEVENT\r\n"
     ics_string += "END:VCALENDAR\r\n"
 
