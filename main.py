@@ -1,6 +1,7 @@
 import discord
 import logging
 import os
+from pathlib import Path
 from ics_writer import ics_writer
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -128,6 +129,8 @@ async def schedule(ctx):
     except FileNotFoundError:
         await ctx.author.send("The file was not found. Please check the path.")
     except Exception as e:
-        await ctx.author.send(f"An error occured: {e}")
+        await ctx.author.send(f"An error occurred: {e}")
+    delete_file = Path(ics_file_path)
+    delete_file.unlink()
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)

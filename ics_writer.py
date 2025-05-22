@@ -14,19 +14,19 @@ def to_ics(event: dict) -> Tuple[str, str]:
                 "VERSION:2.0\r\n"
                 "PRODID:-//LabHelperBot//CalendarExport 1.0//EN\r\n"
                 "BEGIN:VEVENT\r\n")
-    ics_string += "UID:" + event['uid']
+    ics_string += "UID:" + event['uid'] + "\r\n"
     ics_string += "DTSTAMP:" + event['date'] + "T" + event['start_time'] + "Z\r\n"
     ics_string += "DTSTART:" + event['date'] + "T" + event['start_time'] + "\r\n"
     ics_string += "DTEND:" + event['date'] + "T" + event['end_time'] + "\r\n"
     ics_string += "SUMMARY:" + event['title'] + "\r\n"
-    ics_string += "DESCRIPTION:" + event['description']
+    ics_string += "DESCRIPTION:" + event['description'] + "\r\n"
     ics_string += "LOCATION:" + event['location'] + "\r\n"
     for email in event['emails']:
         ics_string += "ATTENDEE;CN=" + email + ":mailto:" + email + "\r\n"
     ics_string += "END:VEVENT\r\n"
     ics_string += "END:VCALENDAR\r\n"
 
-    return ics_string, event['title']
+    return ics_string, event['title'].replace(" ", "")
 
 
 def ics_writer(event: dict) -> str:
