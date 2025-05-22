@@ -3,7 +3,6 @@ from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 import os
-from datetime import datetime
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -57,15 +56,52 @@ async def schedule(ctx):
     location_msg = await bot.wait_for('message', check=check)
     event['location'] = location_msg.content
 
-    await ctx.author.send("Date (Format YYYY-MM-DD HH:MM):")
+    await ctx.author.send("Date (Format YYYY-MM-DD):")
     valid_date = False
     while not valid_date:
         date_msg = await bot.wait_for('message', check=check)
-        try:
-            event['date'] = datetime.strptime(date_msg.content, "%Y-%m-%d %H:%M")
-            valid_date = True
-        except ValueError:
-            await ctx.author.send("Invalid date/time format. Please use YYYY-MM-DD HH:MM.")
+        date_str = date_msg.content.strip()
+        if len(date_str) == 10 and date_str.count('-') == 2:
+            date_parts = date_str.split('-')
+            if all(part.isdigit() for part in date_parts) and len(date_parts[0]) == 4 and len(date_parts[1]) == 2 and len(date_parts[2]) == 2:
+                event['date'] = date_str
+                valid_date = True
+            else:
+                await ctx.author.send("Invalid date format. Please use YYYY-MM-DD.")
+        else:
+            await ctx.author.send("Invalid date format. Please use YYYY-MM-DD.")
+
+    await ctx.author.send("Start time (format HH:MM):")
+    valid_start_time = False
+    while not valid_start_time:
+        start_time_msg = await bot.wait_for('message', check=check)
+        start_time_str = start_time_msg.content.strip()
+        if len(start_time_str) == 5 and start_time_str.count(':') == 1:
+            start_time_parts = start_time_str.split(':')
+            if all(part.isdigit() for part in start_time_parts) and len(start_time_parts[0]) == 2 and len(start_time_parts[1]) == 2:
+                event['start_time'] = start_time_str
+                valid_start_time = True
+            else:
+                await ctx.author.send("Invalid start time. Please use HH:MM.")
+        else:
+            await ctx.author.send("Invalid start time. Please use HH:MM.")
+    
+    await ctx.author.send("End time (format HH:MM):")
+    valid_end_time = False
+    while not valid_end_time:
+        end_time_msg = await bot.wait_for('message', check=check)
+        end_time_str = end_time_msg.content.strip()
+        if len(end_time_str) == 5 and end_time_str.count(':') == 1:
+            end_time_parts = end_time_str.split(':')
+            if all(part.isdigit() for part in end_time_parts) and len(end_time_parts[0]) == 2 and len(end_time_parts[1]) == 2:
+                event['end_time'] = end_time_str
+                valid_end_time = True
+            else:
+                await ctx.author.send("Invalid end time. Please use HH:MM.")
+        else:
+            await ctx.author.send("Invalid end time. Please use HH:MM.")
+    
+    event['uid'] = event['date'] + "LabHelperEvent" # uid stands for unique ID, required for the creation of an ICS file so that we can write the calendar event file. 
     
     await ctx.author.send("Any additional notes or links for the event? If none, please text \"none\".")
     description_msg = await bot.wait_for('message', check=check)
@@ -82,8 +118,7 @@ async def schedule(ctx):
                           f"**Location**: {event['location']}\n"
                           f"**Date/Time**: {event['date']}\n"
                           f"**Notes**: {event['description']}\n"
-                          f"**Participants**: {', '.join(event['emails'])}\n"
-                          f"Sending invites... please check your email soon for more details!")
+                          f"**Participants**: {', '.join(event['emails'])}\n")
     
     
 
