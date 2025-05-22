@@ -1,3 +1,4 @@
+import asyncio
 import discord
 import logging
 import os
@@ -113,15 +114,16 @@ async def schedule(ctx):
     emails_msg = await bot.wait_for('message', check=check)
     event['emails'] = []
     for email in emails_msg.content.split(","):
-        event['emails'].replace(" ", "").append(email) # Make sure there is no space so that the invite can be correctly sent.
+        email.replace(" ", "")
+        event['emails'].append(email) # Make sure there is no space so that the invite can be correctly sent.
     
-    await ctx.author.send(f"Here are the event details:\n"
+    event_info = (f"Here are the event details:\n"
                           f"**Title**: {event['title']}\n"
                           f"**Location**: {event['location']}\n"
                           f"**Date/Time**: {event['date']}\n"
                           f"**Notes**: {event['description']}\n"
                           f"**Participants**: {', '.join(event['emails'])}\n")
-    
+    await ctx.author.send(event_info)
     # Send the file to the user.
     ics_file_path = ics_writer(event)
     try:
@@ -133,4 +135,25 @@ async def schedule(ctx):
     delete_file = Path(ics_file_path)
     delete_file.unlink()
 
+    # Check if the user wants the info (not the file) to the server as well.
+    def reaction_check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ["👍", "👎"] and reaction.message.id == poll_message.id
+
+    embed = discord.Embed(title="Do you want me to send the event details to the server?", description="React with 👍 for yes, or 👎 for no.\n" +
+                          "Note that the .ics file won't be sent to the server since the invite will be sent via email once you open the file." +
+                          "Only the event information will be sent to the server so others can see.")
+    poll_message = await ctx.author.send(embed=embed)
+    await poll_message.add_reaction("👍")
+    await poll_message.add_reaction("👎")
+    try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=reaction_check)
+        if reaction.emoji == "👍":
+            await ctx.send(f"New event created by {ctx.author.mention}!\n" + event_info)
+        else:
+            await ctx.author.send("Got it. The event info will not be posted!")
+    except asyncio.TimeoutError:
+        await ctx.author.send("No response received in time. Event details will not be posted.")
+
+
+    # Creates a pool on whether person wants this info to be sent to the discord chat or not. If reacted with thumbs up then send in there.
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
