@@ -6,6 +6,7 @@ from pathlib import Path
 from ics_writer import ics_writer
 from dotenv import load_dotenv
 from discord.ext import commands
+from discord.ui import Button, View
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -136,30 +137,38 @@ async def schedule(ctx):
     delete_file = Path(ics_file_path)
     delete_file.unlink()
 
+    class PollView(View):
+        def __init__(self):
+            super().__init__()
+            self.response = None
+
+        @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
+        async def yes_button(self, interaction: discord.Interaction, button: Button):
+            self.response = "yes"
+            await interaction.response.send_message("Got it! The event details will be sent to the server.", ephemeral=True)
+            self.stop()
+
+        @discord.ui.button(label="No", style=discord.ButtonStyle.red)
+        async def no_button(self, interaction: discord.Interaction, button: Button):
+            self.response = "no"
+            await interaction.response.send_message("Understood! The event details will not be posted.", ephemeral=True)
+            self.stop()
+
     # Check if the user wants the info (not the file) to the server as well.
-    embed = discord.Embed(title="Do you want me to send the event details to the server?", description="React with 👍 for yes, or 👎 for no.\n" +
+    embed = discord.Embed(title="Do you want me to send the event details to the server?", description="Click **Yes** to send the event details to the server, or **No** to keep them private.\n" +
                           "Note that the .ics file won't be sent to the server since the invite will be sent via email once you open the file. " +
                           "Only the event information will be sent to the server so others can see.")
-    poll_message = await ctx.author.send(embed=embed)
-    await poll_message.add_reaction("👍")
-    await poll_message.add_reaction("👎")
-    print(f"Waiting for reaction on message ID: {poll_message.id}")
-    def reaction_check(reaction, user):
-        print(f"Reaction: {reaction}, User: {user}, Message ID: {reaction.message.id}")
-        return (
-            user == ctx.author and
-            str(reaction.emoji) in ["👍", "👎"] and
-            reaction.message.id == poll_message.id
-            )
+    poll_view = PollView()
+    await ctx.author.send(embed=embed, view=poll_view)
 
-    try:
-        reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=reaction_check)
-        if str(reaction.emoji) == "👍":
-            await ctx.send(f"New event created by {ctx.author.mention}!\n" + event_info)
-        else:
-            await ctx.author.send("Got it. The event info will not be posted!")
-    except asyncio.TimeoutError:
-        await ctx.author.send("No response received in time. Event details will not be posted.")
+    # Wait for the user to click a button
+    await poll_view.wait()
+
+    # Handle the user's response
+    if poll_view.response == "yes":
+        await ctx.send(f"New event created by {ctx.author.mention}!\n" + event_info)
+    elif poll_view.response == "no":
+        await ctx.author.send("Got it. The event info will not be posted.")
 
     # Creates a pool on whether person wants this info to be sent to the discord chat or not. If reacted with thumbs up then send in there.
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
