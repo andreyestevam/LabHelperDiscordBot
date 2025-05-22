@@ -64,7 +64,7 @@ async def schedule(ctx):
             event['date'] = datetime.strptime(date_msg.content, "%Y-%m-%d %H:%M")
             valid_date = True
         except ValueError:
-            await ctx.author.send("Invalid date/time formate. Please use YYYY-MM-DD HH:MM.")
+            await ctx.author.send("Invalid date/time format. Please use YYYY-MM-DD HH:MM.")
     
     await ctx.author.send("Any additional notes or links for the event? If none, please text \"none\".")
     description_msg = await bot.wait_for('message', check=check)
