@@ -121,9 +121,13 @@ async def schedule(ctx):
                           f"**Notes**: {event['description']}\n"
                           f"**Participants**: {', '.join(event['emails'])}\n")
     
+    # Send the file to the user.
     ics_file_path = ics_writer(event)
-
-    
-    
+    try:
+        await ctx.author.send(file=discord.File(ics_file_path))
+    except FileNotFoundError:
+        await ctx.author.send("The file was not found. Please check the path.")
+    except Exception as e:
+        await ctx.author.send(f"An error occured: {e}")
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)

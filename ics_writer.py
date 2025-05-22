@@ -26,7 +26,7 @@ def to_ics(event: dict) -> Tuple[str, str]:
     ics_string += "END:VEVENT\r\n"
     ics_string += "END:VCALENDAR\r\n"
 
-    return ics_string, event['uid']
+    return ics_string, event['title']
 
 
 def ics_writer(event: dict) -> str:
