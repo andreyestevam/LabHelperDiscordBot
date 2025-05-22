@@ -43,6 +43,7 @@ async def schedule(ctx):
     def check(m):
         return m.author == ctx.author and isinstance(m.channel, discord.DMChannel)
     
+    await ctx.message.delete()
     event = dict() # This dictionary will hold all the info about the event.
     
     # Send a DM to the user. Then, all the info will be handled through the DM for privacy purposes.
@@ -83,5 +84,7 @@ async def schedule(ctx):
                           f"**Notes**: {event['description']}\n"
                           f"**Participants**: {', '.join(event['emails'])}\n"
                           f"Sending invites... please check your email soon for more details!")
+    
+    
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
