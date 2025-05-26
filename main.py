@@ -105,6 +105,31 @@ async def schedule(ctx):
         else:
             await ctx.author.send("Invalid end time (Eastern Time ET). Please use HH:MM (24-hour time format).")
     
+    await ctx.author.send(
+        "Is this a recurring event? Please type the number corresponding to your choice:\n"
+        "1. No\n"
+        "2. Daily\n"
+        "3. Weekly\n"
+        "4. Every other week\n"
+        "5. Monthly"
+    )
+    valid_recurrence = False
+    recurrence_options = {
+        "1": None,  # No recurrence, so don't add RRULE to ICS
+        "2": "FREQ=DAILY",
+        "3": "FREQ=WEEKLY",
+        "4": "FREQ=WEEKLY;INTERVAL=2",
+        "5": "FREQ=MONTHLY"
+    }
+    while not valid_recurrence:
+        recurrence_msg = await bot.wait_for('message', check=check)
+        choice = recurrence_msg.content.strip()
+        if choice in recurrence_options:
+            event['recurrence'] = recurrence_options[choice]
+            valid_recurrence = True
+        else:
+            await ctx.author.send("Invalid choice. Please type a number from 1 to 5.")
+    
     event['uid'] = event['date'].replace("-", "") + "LabHelperEvent" # uid stands for unique ID, required for the creation of an ICS file so that we can write the calendar event file.
     
     await ctx.author.send("Any additional notes or links for the event? If none, please text \"none\".")
