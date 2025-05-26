@@ -21,6 +21,10 @@ def to_ics(event: dict) -> Tuple[str, str]:
     ics_string += "SUMMARY:" + event['title'] + "\r\n"
     ics_string += "DESCRIPTION:" + event['description'] + "\r\n"
     ics_string += "LOCATION:" + event['location'] + "\r\n"
+
+    if event['recurrence']:
+        ics_string += "RRULE:" + event['recurrence']
+    
     for email in event['emails']:
         ics_string += "ATTENDEE" + ":mailto:" + email + "\r\n"
     ics_string += "END:VEVENT\r\n"
