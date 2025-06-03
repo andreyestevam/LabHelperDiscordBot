@@ -23,10 +23,10 @@ def to_ics(event: dict) -> Tuple[str, str]:
     ics_string += "LOCATION:" + event['location'] + "\r\n"
 
     if event['recurrence']:
-        ics_string += "RRULE:" + event['recurrence']
+        ics_string += "RRULE:" + event['recurrence'] + "\r\n"
     
     for email in event['emails']:
-        ics_string += "ATTENDEE" + ":mailto:" + email + "\r\n"
+        ics_string += "ATTENDEE" + ":mailto:" + email.replace(" ", "") + "\r\n"
     ics_string += "END:VEVENT\r\n"
     ics_string += "END:VCALENDAR\r\n"
 
