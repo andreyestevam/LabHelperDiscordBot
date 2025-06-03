@@ -191,8 +191,6 @@ async def schedule(ctx):
     # Handle the user's response
     if poll_view.response == "yes":
         await ctx.send(f"New event created by {ctx.author.mention}!\n" + event_info)
-    elif poll_view.response == "no":
-        await ctx.author.send("Got it. The event info will not be posted.")
 
     # Creates a pool on whether person wants this info to be sent to the discord chat or not. If reacted with thumbs up then send in there.
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
