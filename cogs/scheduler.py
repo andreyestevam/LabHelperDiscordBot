@@ -92,7 +92,7 @@ class Scheduler(commands.Cog):
         emails_msg = await self.bot.wait_for('message', check=check)
         event['emails'] = []
         for email in emails_msg.content.split(","):
-            email.replace(" ", "")
+            email = email.replace(" ", "")
             event['emails'].append(email) # Make sure there is no space so that the invite can be correctly sent.
         
         event_info = (f"Here are the event details:\n"
