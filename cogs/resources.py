@@ -20,7 +20,25 @@ class Resources(commands.Cog):
     
     @commands.command()
     async def resources(self, ctx):
-        pass
+        await ctx.message.delete() # Deletes the message from the server
+
+        with sqlite3.connect('resources.db') as connection: # Opens the database
+            cursor = connection.cursor()
+            cursor.execute(f'SELECT * FROM resources ORDER BY resource_title')
+
+            rows = cursor.fetchall() # Fetch all the results
+
+            if not rows:
+                await ctx.send("No resources found.")
+                return
+
+            rows_msg = ""
+            for row in rows:
+                title, description, link = row
+                rows_msg += f"**{title}**\n{description if description else '*No description*'}\n{link}\n\n"
+            
+            await ctx.send(rows_msg)
+                
 
     @commands.command()
     async def add_resource(self, ctx):
