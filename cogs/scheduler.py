@@ -143,9 +143,9 @@ class Scheduler(commands.Cog):
         # Handle the user's response
         if poll_view.response == "yes":
             await ctx.send(f"New event created by {ctx.author.mention}!\n" + event_info)
-    
-    def setup(bot):
+
+async def setup(bot):
         """
         Required setup function for the Cog to be loaded.
         """
-        bot.add_cog(Scheduler(bot))
+        await bot.add_cog(Scheduler(bot))
