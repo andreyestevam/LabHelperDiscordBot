@@ -34,16 +34,27 @@ class Resources(commands.Cog):
                 await ctx.send("No resources found.")
                 return
             
-            embed = discord.Embed(title="Learning Resources", color=discord.Color.blue())
+            # Split resources into multiple embeds since Discord has a limit
+            embeds = []
+            current_embed = discord.Embed(title="Learning Resources", color=discord.Color.blue())
 
-            rows_msg = ""
-            for row in rows:
+            for i, row in enumerate(rows):
                 title, description, link = row
-                embed.add_field(name=title, value=f"{description or '*No description*'}\n{link}", inline=False)
-            embed.set_footer(text=f"Requested by {ctx.author.display_name}")
-            embed.timestamp = datetime.now(ZoneInfo("America/New_York"))
-            await ctx.send(embed=embed)
-                
+
+                if len(description) > 1000: # Limit description to avoid exceeding Discord's character limit
+                    description = description[:997] + "..."
+
+                current_embed.add_field(name=title, value=f"{description or '*No description*'}\n{link}", inline=False)
+
+                if (i + 1) % 25 == 0 or (i + 1) == len(rows): # Checks if the current_embed reached Discord's limit
+                    current_embed.set_footer(text=f"Requested by {ctx.author.display_name}")
+                    current_embed.timestamp = datetime.now(ZoneInfo("America/New_York"))
+                    embeds.append(current_embed)
+                    if (i + 1) != len(rows):
+                        current_embed = discord.Embed(title="Learning Resources (cont.)", color=discord.Color.blue())
+
+            for embed in embeds:
+                await ctx.send(embed=embed)
 
     @commands.command()
     async def add_resource(self, ctx):
