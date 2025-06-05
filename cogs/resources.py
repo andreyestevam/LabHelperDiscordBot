@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import sqlite3
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 class Resources(commands.Cog):
     def __init__(self, bot):
@@ -31,13 +33,16 @@ class Resources(commands.Cog):
             if not rows:
                 await ctx.send("No resources found.")
                 return
+            
+            embed = discord.Embed(title="Learning Resources", color=discord.Color.blue())
 
             rows_msg = ""
             for row in rows:
                 title, description, link = row
-                rows_msg += f"**{title}**\n{description if description else '*No description*'}\n{link}\n\n"
-            
-            await ctx.send(rows_msg)
+                embed.add_field(name=title, value=f"{description or '*No description*'}\n{link}", inline=False)
+            embed.set_footer(text=f"Requested by {ctx.author.display_name}")
+            embed.timestamp = datetime.now(ZoneInfo("America/New_York"))
+            await ctx.send(embed=embed)
                 
 
     @commands.command()
