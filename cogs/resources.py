@@ -36,7 +36,7 @@ class Resources(commands.Cog):
             
             # Split resources into multiple embeds since Discord has a limit
             embeds = []
-            current_embed = discord.Embed(title="Learning Resources", color=discord.Color.blue())
+            current_embed = discord.Embed(title="Useful Resources", color=discord.Color.blue())
 
             for i, row in enumerate(rows):
                 title, description, link = row
