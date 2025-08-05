@@ -13,20 +13,22 @@ class Resources(commands.Cog):
         with sqlite3.connect('resources.db') as connection:
             cursor = connection.cursor()
             cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS resources (
-                        resource_title TEXT NOT NULL,
-                        description TEXT,
-                        link TEXT NOT NULL
-                    )         
-                """)
+                CREATE TABLE IF NOT EXISTS resources (
+                    guild_id INTEGER NOT NULL,
+                    resource_title TEXT NOT NULL,
+                    description TEXT,
+                    link TEXT NOT NULL
+                )
+            """)
     
     @commands.command()
     async def resources(self, ctx):
+        guild_id = ctx.guild.id
         await ctx.message.delete() # Deletes the message from the server
 
         with sqlite3.connect('resources.db') as connection: # Opens the database
             cursor = connection.cursor()
-            cursor.execute(f'SELECT * FROM resources ORDER BY resource_title')
+            cursor.execute('SELECT resource_title, description, link FROM resources WHERE guild_id = ? ORDER BY resource_title', (guild_id,))
 
             rows = cursor.fetchall() # Fetch all the results
 
@@ -58,6 +60,7 @@ class Resources(commands.Cog):
 
     @commands.command()
     async def add_resource(self, ctx):
+        guild_id = ctx.guild.id
         await ctx.message.delete()
 
         def check(msg):
@@ -80,8 +83,8 @@ class Resources(commands.Cog):
 
             with sqlite3.connect('resources.db') as connection:
                 cursor = connection.cursor()
-                cursor.execute("INSERT INTO resources (resource_title, description, link) VALUES (?, ?, ?)",
-                               (title, description, link))
+                cursor.execute("INSERT INTO resources (guild_id, resource_title, description, link) VALUES (?, ?, ?, ?)",
+                               (guild_id, title, description, link))
                 connection.commit()
 
             await ctx.send(f"✅ Resource '{title}' added successfully!", delete_after=10)
@@ -91,6 +94,7 @@ class Resources(commands.Cog):
 
     @commands.command()
     async def delete_resource(self, ctx):
+        guild_id = ctx.guild.id
         await ctx.message.delete()
 
         def check(msg):
@@ -103,14 +107,14 @@ class Resources(commands.Cog):
 
             with sqlite3.connect('resources.db') as connection:
                 cursor = connection.cursor()
-                cursor.execute("SELECT * FROM resources WHERE resource_title = ?", (title_to_delete,))
+                cursor.execute("SELECT * FROM resources WHERE guild_id = ? AND resource_title = ?", (guild_id, title_to_delete))
                 resource = cursor.fetchone()
 
                 if resource is None:
                     await ctx.send(f"❌ Resource titled '{title_to_delete}' not found.", delete_after=10)
                     return
 
-                cursor.execute("DELETE FROM resources WHERE resource_title = ?", (title_to_delete,))
+                cursor.execute("DELETE FROM resources WHERE guild_id = ? AND resource_title = ?", (guild_id, title_to_delete))
                 connection.commit()
 
             await ctx.send(f"✅ Resource '{title_to_delete}' deleted successfully.", delete_after=10)
