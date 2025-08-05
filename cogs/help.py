@@ -22,5 +22,5 @@ class Help(commands.Cog):
         embed.set_footer(text=f"Requested by {ctx.author.display_name}")
         await ctx.send(embed=embed)
     
-    async def setup(bot):
-        await bot.add_cog(Help(bot))
+async def setup(bot):
+    await bot.add_cog(Help(bot))
