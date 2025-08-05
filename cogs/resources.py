@@ -58,7 +58,36 @@ class Resources(commands.Cog):
 
     @commands.command()
     async def add_resource(self, ctx):
-        pass
+        await ctx.message.delete()
+
+        def check(msg):
+            return msg.author == ctx.author and msg.channel == ctx.channel
+
+        try:
+            await ctx.send("Please enter the **title** of the resource:")
+            title_msg = await self.bot.wait_for("message", timeout=60.0, check=check)
+            title = title_msg.content
+
+            await ctx.send("Please enter the **description** of the resource (or type 'none'):")
+            desc_msg = await self.bot.wait_for("message", timeout=120.0, check=check)
+            description = desc_msg.content
+            if description.lower() == 'none':
+                description = None
+
+            await ctx.send("Please enter the **link** to the resource:")
+            link_msg = await self.bot.wait_for("message", timeout=60.0, check=check)
+            link = link_msg.content
+
+            with sqlite3.connect('resources.db') as connection:
+                cursor = connection.cursor()
+                cursor.execute("INSERT INTO resources (resource_title, description, link) VALUES (?, ?, ?)",
+                               (title, description, link))
+                connection.commit()
+
+            await ctx.send(f"✅ Resource '{title}' added successfully!", delete_after=10)
+
+        except Exception as e:
+            await ctx.send(f"❌ Failed to add resource: {str(e)}", delete_after=10)
 
     @commands.command()
     async def delete_resource(self, ctx):
