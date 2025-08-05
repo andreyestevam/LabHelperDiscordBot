@@ -7,6 +7,7 @@ from ics_writer import ics_writer
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord.ui import Button, View
+import webserver
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -42,6 +43,7 @@ async def load_cogs():
 
 async def main():
     await load_cogs()
+    webserver.keep_alive()
     await bot.start(token)
 
 if __name__ == '__main__':
