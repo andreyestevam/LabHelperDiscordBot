@@ -91,7 +91,32 @@ class Resources(commands.Cog):
 
     @commands.command()
     async def delete_resource(self, ctx):
-        pass
+        await ctx.message.delete()
+
+        def check(msg):
+            return msg.author == ctx.author and msg.channel == ctx.channel
+
+        try:
+            await ctx.send("Please enter the **title** of the resource you want to delete:")
+            title_msg = await self.bot.wait_for("message", timeout=60.0, check=check)
+            title_to_delete = title_msg.content
+
+            with sqlite3.connect('resources.db') as connection:
+                cursor = connection.cursor()
+                cursor.execute("SELECT * FROM resources WHERE resource_title = ?", (title_to_delete,))
+                resource = cursor.fetchone()
+
+                if resource is None:
+                    await ctx.send(f"❌ Resource titled '{title_to_delete}' not found.", delete_after=10)
+                    return
+
+                cursor.execute("DELETE FROM resources WHERE resource_title = ?", (title_to_delete,))
+                connection.commit()
+
+            await ctx.send(f"✅ Resource '{title_to_delete}' deleted successfully.", delete_after=10)
+
+        except Exception as e:
+            await ctx.send(f"❌ Failed to delete resource: {str(e)}", delete_after=10)
 
 async def setup(bot):
         """
