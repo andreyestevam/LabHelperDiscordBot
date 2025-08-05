@@ -24,8 +24,7 @@ class Resources(commands.Cog):
     @commands.command()
     async def resources(self, ctx):
         guild_id = ctx.guild.id
-        await ctx.message.delete() # Deletes the message from the server
-
+        
         with sqlite3.connect('resources.db') as connection: # Opens the database
             cursor = connection.cursor()
             cursor.execute('SELECT resource_title, description, link FROM resources WHERE guild_id = ? ORDER BY resource_title', (guild_id,))
@@ -61,7 +60,6 @@ class Resources(commands.Cog):
     @commands.command()
     async def add_resource(self, ctx):
         guild_id = ctx.guild.id
-        await ctx.message.delete()
 
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
@@ -95,7 +93,6 @@ class Resources(commands.Cog):
     @commands.command()
     async def delete_resource(self, ctx):
         guild_id = ctx.guild.id
-        await ctx.message.delete()
 
         def check(msg):
             return msg.author == ctx.author and msg.channel == ctx.channel
